@@ -61,6 +61,10 @@ app.use('/api/manufacturing', manufacturingRoutes);
 app.use('/api/notifications', notificationRoutes);
 app.use('/api/dashboard', dashboardRoutes);
 
+// Root-level aliases for frontend resilience
+app.use('/auth', authRoutes);
+app.use('/products', productRoutes);
+
 // ----- Error Handling Middleware -----
 // 404 handler for invalid routes (must be placed after all valid routes)
 app.use(notFoundHandler);
