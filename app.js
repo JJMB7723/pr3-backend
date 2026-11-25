@@ -64,6 +64,12 @@ app.use('/api/dashboard', dashboardRoutes);
 // Root-level aliases for frontend resilience
 app.use('/auth', authRoutes);
 app.use('/products', productRoutes);
+app.use('/orders', orderRoutes);
+app.use('/cart', cartRoutes);
+app.use('/inventory', inventoryRoutes);
+app.use('/deliveries', deliveryRoutes);
+app.use('/returns', returnRoutes);
+app.use('/dashboard', dashboardRoutes);
 
 // ----- Error Handling Middleware -----
 // 404 handler for invalid routes (must be placed after all valid routes)
