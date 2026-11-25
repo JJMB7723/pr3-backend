@@ -210,9 +210,11 @@ const createOrderFromCart = async (userId, shippingDetails = {}) => {
  */
 const getOrders = async (userId, userRole) => {
   const where = {};
-  if (userRole === 'customer') {
+  // Scope orders to the requesting user for all non-admin roles
+  if (userRole === 'customer' || userRole === 'business' || userRole === 'delivery') {
     where.user_id = userId;
   }
+  // admin sees ALL orders (no filter applied)
 
   return await Order.findAll({
     where,
@@ -268,7 +270,7 @@ const getOrderById = async (orderId, requestingUserId, userRole) => {
     throw error;
   }
 
-  if (userRole === 'customer' && order.user_id !== requestingUserId) {
+  if ((userRole === 'customer' || userRole === 'business') && order.user_id !== requestingUserId) {
     const error = new Error('Forbidden. You do not have permission to view this order.');
     error.statusCode = 403;
     throw error;
@@ -367,8 +369,8 @@ const cancelOrder = async (orderId, requestingUserId, userRole) => {
     throw error;
   }
 
-  if (userRole === 'customer' && order.user_id !== requestingUserId) {
-    const error = new Error('Forbidden. You cannot cancel an order belonging to another customer.');
+  if ((userRole === 'customer' || userRole === 'business') && order.user_id !== requestingUserId) {
+    const error = new Error('Forbidden. You cannot cancel an order belonging to another user.');
     error.statusCode = 403;
     throw error;
   }
