@@ -25,10 +25,14 @@ const addItem = async (req, res, next) => {
       });
     }
 
-    const cart = await cartService.addItemToCart(req.user.id, {
-      product_variant_id,
-      quantity,
-    });
+    const cart = await cartService.addItemToCart(
+      req.user.id,
+      {
+        product_variant_id,
+        quantity,
+      },
+      req.user.role
+    );
 
     res.status(200).json({
       success: true,
@@ -46,7 +50,8 @@ const updateItem = async (req, res, next) => {
     const cart = await cartService.updateCartItemQuantity(
       req.user.id,
       req.params.id,
-      quantity
+      quantity,
+      req.user.role
     );
 
     res.status(200).json({

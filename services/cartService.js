@@ -93,10 +93,17 @@ const getCart = async (userId) => {
 /**
  * Add product variant to cart
  */
-const addItemToCart = async (userId, { product_variant_id, quantity = 1 }) => {
+const addItemToCart = async (userId, { product_variant_id, quantity = 1 }, userRole = 'customer') => {
   const qty = parseInt(quantity, 10);
   if (isNaN(qty) || qty <= 0) {
     const error = new Error('Quantity must be a positive integer.');
+    error.statusCode = 400;
+    throw error;
+  }
+
+  // Retail customers are limited to a maximum of 50 units per line item
+  if (userRole !== 'business' && userRole !== 'admin' && qty > 50) {
+    const error = new Error('Retail customer orders are limited to a maximum of 50 units per item. For wholesale orders, please use Wholesale Bulk Ordering.');
     error.statusCode = 400;
     throw error;
   }
@@ -131,6 +138,11 @@ const addItemToCart = async (userId, { product_variant_id, quantity = 1 }) => {
 
   if (cartItem) {
     const newQty = cartItem.quantity + qty;
+    if (userRole !== 'business' && userRole !== 'admin' && newQty > 50) {
+      const error = new Error('Retail customer orders are limited to a maximum of 50 units per item. For wholesale orders, please use Wholesale Bulk Ordering.');
+      error.statusCode = 400;
+      throw error;
+    }
     if (newQty > stock) {
       const error = new Error(`Cannot add ${qty} more items. Available stock is ${stock}.`);
       error.statusCode = 400;
@@ -159,10 +171,17 @@ const addItemToCart = async (userId, { product_variant_id, quantity = 1 }) => {
 /**
  * Update cart item quantity
  */
-const updateCartItemQuantity = async (userId, cartItemId, quantity) => {
+const updateCartItemQuantity = async (userId, cartItemId, quantity, userRole = 'customer') => {
   const qty = parseInt(quantity, 10);
   if (isNaN(qty) || qty <= 0) {
     const error = new Error('Quantity must be at least 1.');
+    error.statusCode = 400;
+    throw error;
+  }
+
+  // Retail customers are limited to a maximum of 50 units per line item
+  if (userRole !== 'business' && userRole !== 'admin' && qty > 50) {
+    const error = new Error('Retail customer orders are limited to a maximum of 50 units per item. For wholesale orders, please use Wholesale Bulk Ordering.');
     error.statusCode = 400;
     throw error;
   }
