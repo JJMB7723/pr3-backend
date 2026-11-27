@@ -17,6 +17,7 @@ const {
   Notification,
 } = require('../models');
 const generateOrderNumber = require('../utils/generateOrderNumber');
+const pricingService = require('./pricingService');
 
 const VALID_STATUSES = ['pending', 'confirmed', 'processing', 'shipped', 'delivered', 'cancelled'];
 
@@ -72,7 +73,22 @@ const createOrderFromCart = async (userId, shippingDetails = {}) => {
       subtotal += parseFloat(variant.price) * item.quantity;
     }
 
-    const totalAmount = subtotal;
+    let totalAmount = subtotal;
+    let appliedCouponCode = null;
+    let discountAmount = 0;
+
+    if (shippingDetails.coupon_code && shippingDetails.coupon_code.trim()) {
+      const couponResult = await pricingService.validateCoupon(
+        shippingDetails.coupon_code,
+        subtotal,
+        t
+      );
+      appliedCouponCode = couponResult.code;
+      discountAmount = couponResult.discountAmount;
+      totalAmount = couponResult.finalTotal;
+      await couponResult.coupon.increment('usedCount', { by: 1, transaction: t });
+    }
+
     const count = await Order.count({ transaction: t });
     const orderNumber = `PR3-ORD-${1001 + count}`;
 
@@ -85,6 +101,10 @@ const createOrderFromCart = async (userId, shippingDetails = {}) => {
         order_number: orderNumber,
         totalAmount: parseFloat(totalAmount.toFixed(2)),
         total_amount: parseFloat(totalAmount.toFixed(2)),
+        couponCode: appliedCouponCode,
+        coupon_code: appliedCouponCode,
+        discountAmount: parseFloat(discountAmount.toFixed(2)),
+        discount_amount: parseFloat(discountAmount.toFixed(2)),
         orderStatus: 'pending',
         order_status: 'pending',
         shippingName: shippingDetails.shipping_name || 'Valued Customer',

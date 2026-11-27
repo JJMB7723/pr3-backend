@@ -10,6 +10,9 @@ const { authorizeRoles } = require('../middlewares/roleMiddleware');
 // All order operations require authentication
 router.use(protect);
 
+// POST /api/orders/validate-coupon – Validate coupon code against active cart
+router.post('/validate-coupon', authorizeRoles('customer', 'business', 'admin'), orderController.validateCoupon);
+
 // POST /api/orders – Checkout current cart to order (Customer / Business / Admin)
 router.post('/', authorizeRoles('customer', 'business', 'admin'), orderController.createOrder);
 

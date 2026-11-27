@@ -25,6 +25,7 @@ const ManufacturingOrder = require('./ManufacturingOrder');
 const ProductionRecord = require('./ProductionRecord');
 const QualityInspection = require('./QualityInspection');
 const Notification = require('./Notification');
+const Coupon = require('./Coupon');
 
 // ==========================================
 // 1. Categories & Products
@@ -369,4 +370,5 @@ module.exports = {
   ProductionRecord,
   QualityInspection,
   Notification,
+  Coupon,
 };

@@ -34,6 +34,17 @@ const Order = sequelize.define('Order', {
       min: 0,
     },
   },
+  couponCode: {
+    type: DataTypes.STRING(50),
+    allowNull: true,
+    field: 'coupon_code',
+  },
+  discountAmount: {
+    type: DataTypes.DECIMAL(10, 2),
+    allowNull: false,
+    defaultValue: 0,
+    field: 'discount_amount',
+  },
   orderStatus: {
     type: DataTypes.STRING(30),
     allowNull: false,

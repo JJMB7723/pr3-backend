@@ -2,6 +2,54 @@
 // ---------------------------------------------------
 
 const orderService = require('../services/orderService');
+const pricingService = require('../services/pricingService');
+const { Cart, CartItem, ProductVariant } = require('../models');
+
+const validateCoupon = async (req, res, next) => {
+  try {
+    const { coupon_code, subtotal: clientSubtotal } = req.body;
+    let subtotal = parseFloat(clientSubtotal);
+
+    // Compute subtotal directly from user's active cart for accuracy
+    const cart = await Cart.findOne({
+      where: { user_id: req.user.id, status: 'active' },
+      include: [
+        {
+          model: CartItem,
+          as: 'items',
+          include: [{ model: ProductVariant, as: 'product_variant' }],
+        },
+      ],
+    });
+
+    if (cart && cart.items && cart.items.length > 0) {
+      subtotal = cart.items.reduce((sum, item) => {
+        const price = parseFloat(item.product_variant?.price || 0);
+        return sum + price * item.quantity;
+      }, 0);
+    } else if (isNaN(subtotal)) {
+      subtotal = 0;
+    }
+
+    const result = await pricingService.validateCoupon(coupon_code, subtotal);
+
+    res.status(200).json({
+      success: true,
+      message: `Coupon '${result.code}' applied! You save $${result.discountAmount.toFixed(2)}.`,
+      data: {
+        code: result.code,
+        description: result.description,
+        discount_type: result.discountType,
+        discount_value: result.discountValue,
+        subtotal: result.subtotal,
+        discount_amount: result.discountAmount,
+        final_total: result.finalTotal,
+      },
+    });
+  } catch (error) {
+    next(error);
+  }
+};
 
 const createOrder = async (req, res, next) => {
   try {
@@ -72,6 +120,7 @@ const cancelOrder = async (req, res, next) => {
 };
 
 module.exports = {
+  validateCoupon,
   createOrder,
   getOrders,
   getOrder,
