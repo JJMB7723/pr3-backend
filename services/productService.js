@@ -91,11 +91,14 @@ const deleteCategory = async (id) => {
 // Product Operations
 // ==========================================
 
-const getProducts = async ({ page = 1, limit = 10, search, category_id, sortBy }) => {
+const getProducts = async ({ page = 1, limit = 10, search, category_id, sortBy, include_inactive }) => {
   const offset = (Math.max(1, parseInt(page, 10)) - 1) * Math.max(1, parseInt(limit, 10));
   const take = Math.min(100, Math.max(1, parseInt(limit, 10)));
 
-  const where = { is_active: true };
+  const where = {};
+  if (include_inactive !== 'true' && include_inactive !== true) {
+    where.is_active = true;
+  }
 
   // Search filter
   if (search && search.trim() !== '') {
