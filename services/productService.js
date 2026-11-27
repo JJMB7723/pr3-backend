@@ -279,7 +279,7 @@ const updateProduct = async (id, { category_id, name, description, image_url, im
     product.imageUrl = img;
     product.image_url = img;
   }
-  if (is_active !== undefined) product.is_active = is_active;
+  if (is_active !== undefined) product.isActive = is_active;
 
   await product.save();
 
@@ -299,7 +299,7 @@ const updateProduct = async (id, { category_id, name, description, image_url, im
 
 const deleteProduct = async (id) => {
   const product = await getProductById(id);
-  product.is_active = false;
+  product.isActive = false;
   await product.save();
   return { message: 'Product deactivated successfully.', product_id: product.id };
 };
